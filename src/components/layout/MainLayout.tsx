@@ -5,10 +5,21 @@ import { Dashboard } from "@/pages/Dashboard";
 import { Vehicles } from "@/pages/Vehicles";
 import { Routes } from "@/pages/Routes";
 import { Saccos } from "@/pages/Saccos";
+import { Terminuses } from "@/pages/Terminuses";
+import { Drivers } from "@/pages/Drivers";
+import { Payments } from "@/pages/Payments";
+import { Reports } from "@/pages/Reports";
+import { Settings } from "@/pages/Settings";
+import { Auth } from "@/pages/Auth";
 
 export const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState("dashboard");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  if (!isAuthenticated) {
+    return <Auth onAuth={() => setIsAuthenticated(true)} />;
+  }
 
   const renderPage = () => {
     switch (currentPage) {
@@ -21,33 +32,13 @@ export const MainLayout = () => {
       case "saccos":
         return <Saccos />;
       case "terminuses":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Terminus Management</h1>
-            <p className="text-muted-foreground">Coming soon - Manage terminus operations and facilities</p>
-          </div>
-        );
+        return <Terminuses />;
       case "drivers":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Driver Management</h1>
-            <p className="text-muted-foreground">Coming soon - Manage driver licenses and assignments</p>
-          </div>
-        );
+        return <Drivers />;
       case "payments":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Payment Management</h1>
-            <p className="text-muted-foreground">Coming soon - Track taxes, fees, and revenue</p>
-          </div>
-        );
+        return <Payments />;
       case "reports":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Reports & Analytics</h1>
-            <p className="text-muted-foreground">Coming soon - Generate detailed reports and insights</p>
-          </div>
-        );
+        return <Reports />;
       case "documents":
         return (
           <div className="space-y-6">
@@ -56,12 +47,7 @@ export const MainLayout = () => {
           </div>
         );
       case "settings":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">System Settings</h1>
-            <p className="text-muted-foreground">Coming soon - Configure system preferences and user management</p>
-          </div>
-        );
+        return <Settings />;
       default:
         return <Dashboard />;
     }
