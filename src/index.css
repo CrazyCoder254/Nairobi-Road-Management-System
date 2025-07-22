@@ -8,33 +8,56 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Kenya-inspired professional color palette */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Kenya flag inspired - deep green primary */
+    --primary: 140 85% 20%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 140 85% 25%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Professional gray secondary */
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 0 0% 12%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Kenya flag red for accents */
+    --accent: 0 75% 50%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 140 85% 20%;
+
+    /* Transport system specific colors */
+    --success: 140 85% 35%;
+    --success-foreground: 0 0% 98%;
+    --warning: 45 93% 50%;
+    --warning-foreground: 0 0% 12%;
+    --info: 210 100% 50%;
+    --info-foreground: 0 0% 98%;
+
+    /* Gradients for beautiful effects */
+    --gradient-primary: linear-gradient(135deg, hsl(140 85% 20%), hsl(140 85% 25%));
+    --gradient-hero: linear-gradient(135deg, hsl(140 85% 20%), hsl(0 75% 50%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 20% 98%));
+
+    /* Shadows for depth */
+    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.1);
+    --shadow-elevated: 0 8px 24px -4px hsl(0 0% 0% / 0.15);
+    --shadow-primary: 0 4px 16px -2px hsl(140 85% 20% / 0.3);
 
     --radius: 0.5rem;
 
