@@ -10,6 +10,7 @@ import { Drivers } from "@/pages/Drivers";
 import { Payments } from "@/pages/Payments";
 import { Reports } from "@/pages/Reports";
 import { Settings } from "@/pages/Settings";
+import { Documents } from "@/pages/Documents";
 import { Auth } from "@/pages/Auth";
 
 export const MainLayout = () => {
@@ -40,12 +41,7 @@ export const MainLayout = () => {
       case "reports":
         return <Reports />;
       case "documents":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Document Management</h1>
-            <p className="text-muted-foreground">Coming soon - Manage licenses, permits, and compliance documents</p>
-          </div>
-        );
+        return <Documents />;
       case "settings":
         return <Settings />;
       default:

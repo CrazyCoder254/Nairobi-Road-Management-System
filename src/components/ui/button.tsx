@@ -22,6 +22,7 @@ const buttonVariants = cva(
         warning: "bg-warning text-warning-foreground hover:bg-warning/90 shadow-md hover:shadow-lg",
         info: "bg-info text-info-foreground hover:bg-info/90 shadow-md hover:shadow-lg",
         hero: "bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-xl shadow-lg transform hover:scale-105",
+        premium: "bg-gradient-to-r from-warning to-warning-glow text-warning-foreground hover:shadow-xl shadow-md transform hover:scale-105 border border-warning/20",
       },
       size: {
         default: "h-10 px-4 py-2",
