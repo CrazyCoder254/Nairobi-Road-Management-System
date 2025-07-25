@@ -1,0 +1,28 @@
+const express = require('express');
+const { body } = require('express-validator');
+const terminusController = require('../controllers/terminusController');
+const auth = require('../middleware/auth');
+const { authorize } = require('../middleware/auth');
+
+const router = express.Router();
+
+// Validation rules
+const terminusValidation = [
+  body('name').notEmpty().withMessage('Terminus name is required'),
+  body('location.address').notEmpty().withMessage('Address is required'),
+  body('location.city').notEmpty().withMessage('City is required'),
+  body('location.region').notEmpty().withMessage('Region is required'),
+  body('capacity').isInt({ min: 1 }).withMessage('Valid capacity is required'),
+  body('contactPerson.name').notEmpty().withMessage('Contact person name is required'),
+  body('contactPerson.phone').isMobilePhone().withMessage('Valid contact phone is required')
+];
+
+// Routes
+router.get('/', auth, terminusController.getAllTerminuses);
+router.get('/:id', auth, terminusController.getTerminusById);
+router.get('/:id/capacity', auth, terminusController.getTerminusCapacity);
+router.post('/', auth, authorize(['admin', 'operator']), terminusValidation, terminusController.createTerminus);
+router.put('/:id', auth, authorize(['admin', 'operator']), terminusValidation, terminusController.updateTerminus);
+router.delete('/:id', auth, authorize(['admin']), terminusController.deleteTerminus);
+
+module.exports = router;
