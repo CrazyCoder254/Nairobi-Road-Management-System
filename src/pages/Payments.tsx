@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { paymentsAPI } from "@/lib/api";
+import { CreatePaymentForm } from "@/components/forms/CreatePaymentForm";
 import { 
   CreditCard, 
   Plus, 
@@ -19,7 +23,8 @@ import {
   Eye,
   MoreVertical,
   Banknote,
-  Wallet
+  Wallet,
+  Loader2
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -28,8 +33,66 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export const Payments = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [payments, setPayments] = useState([]);
+  const [paymentStats, setPaymentStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const payments = [
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      const response = await paymentsAPI.getAll({ search: searchTerm });
+      setPayments(response.data || []);
+    } catch (error) {
+      toast.error("Failed to fetch payments");
+      console.error("Fetch payments error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPaymentStats = async () => {
+    try {
+      const response = await paymentsAPI.getStats();
+      setPaymentStats(response);
+    } catch (error) {
+      console.error("Fetch payment stats error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayments();
+    fetchPaymentStats();
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchPayments();
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const handleCreateSuccess = () => {
+    setIsDialogOpen(false);
+    fetchPayments();
+    fetchPaymentStats();
+  };
+
+  const handleProcessPayment = async (id: string) => {
+    try {
+      await paymentsAPI.processPayment(id, {
+        amount: 0, // This would come from a form
+        paymentMethod: 'mobile_money'
+      });
+      toast.success("Payment processed successfully");
+      fetchPayments();
+      fetchPaymentStats();
+    } catch (error) {
+      toast.error("Failed to process payment");
+    }
+  };
+
+  const payments_mock = [
     {
       id: "PAY001",
       type: "license_fee",
@@ -208,10 +271,23 @@ export const Payments = () => {
             Track taxes, fees, and revenue collection
           </p>
         </div>
-        <Button variant="premium" className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Record Payment
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="premium" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Record Payment
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Payment Record</DialogTitle>
+            </DialogHeader>
+            <CreatePaymentForm 
+              onSuccess={handleCreateSuccess}
+              onCancel={() => setIsDialogOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -221,7 +297,9 @@ export const Payments = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Collected Today</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">KSh {totalCollected.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-success">
+              KSh {paymentStats?.totalRevenue ? paymentStats.totalRevenue.toLocaleString() : '0'}
+            </div>
             <p className="text-sm text-success">+18% from yesterday</p>
           </CardContent>
         </Card>
@@ -231,8 +309,10 @@ export const Payments = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Pending Payments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-warning">KSh {totalPending.toLocaleString()}</div>
-            <p className="text-sm text-muted-foreground">{payments.filter(p => p.status === "pending").length} transactions</p>
+            <div className="text-2xl font-bold text-warning">
+              KSh {paymentStats?.pendingAmount ? paymentStats.pendingAmount.toLocaleString() : '0'}
+            </div>
+            <p className="text-sm text-muted-foreground">{paymentStats?.pendingCount || 0} transactions</p>
           </CardContent>
         </Card>
         
@@ -241,7 +321,7 @@ export const Payments = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-danger">{overdueCount}</div>
+            <div className="text-2xl font-bold text-danger">{paymentStats?.overdueCount || 0}</div>
             <p className="text-sm text-muted-foreground">require immediate action</p>
           </CardContent>
         </Card>
@@ -251,7 +331,9 @@ export const Payments = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">KSh {monthlyRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-primary">
+              KSh {paymentStats?.totalRevenue ? paymentStats.totalRevenue.toLocaleString() : '0'}
+            </div>
             <p className="text-sm text-success">+25% from last month</p>
           </CardContent>
         </Card>
@@ -297,82 +379,99 @@ export const Payments = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Payment Details</TableHead>
-                    <TableHead>Vehicle/Sacco</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-foreground">{payment.description}</div>
-                          <div className="text-sm text-muted-foreground">{payment.id}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {getPaymentTypeLabel(payment.type)}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-sm">{payment.vehicle}</div>
-                          <div className="text-xs text-muted-foreground">{payment.sacco}</div>
-                          <div className="text-xs text-muted-foreground">by {payment.paidBy}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">KSh {payment.amount.toLocaleString()}</div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getMethodIcon(payment.method)}
-                          <span className="text-sm capitalize">
-                            {payment.method.replace('_', ' ')}
-                          </span>
-                        </div>
-                        {payment.transactionId && (
-                          <div className="text-xs text-muted-foreground">{payment.transactionId}</div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">{payment.dueDate}</div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="flex items-center gap-2">
-                              <Eye className="h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-2">
-                              <Receipt className="h-4 w-4" />
-                              Generate Receipt
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-2">
-                              <Download className="h-4 w-4" />
-                              Download Invoice
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Payment Details</TableHead>
+                      <TableHead>Entity</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {payments.map((payment: any) => (
+                      <TableRow key={payment._id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-foreground">{payment.description}</div>
+                            <div className="text-sm text-muted-foreground">{payment.referenceNumber}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {getPaymentTypeLabel(payment.paymentType)}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-sm">
+                              {payment.vehicle ? `Vehicle: ${payment.vehicle.plateNumber}` : 
+                               payment.driver ? `Driver: ${payment.driver.userId?.firstName} ${payment.driver.userId?.lastName}` : 'N/A'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              by {payment.paidBy?.firstName} {payment.paidBy?.lastName}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">KSh {payment.amount.toLocaleString()}</div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            {new Date(payment.dueDate).toLocaleDateString()}
+                          </div>
+                          {payment.paidDate && (
+                            <div className="text-xs text-muted-foreground">
+                              Paid: {new Date(payment.paidDate).toLocaleDateString()}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem className="flex items-center gap-2">
+                                <Eye className="h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                              {payment.status === 'pending' && (
+                                <DropdownMenuItem 
+                                  className="flex items-center gap-2"
+                                  onClick={() => handleProcessPayment(payment._id)}
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                  Process Payment
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem className="flex items-center gap-2">
+                                <Receipt className="h-4 w-4" />
+                                Generate Receipt
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {payments.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-4">
+                          No payments found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

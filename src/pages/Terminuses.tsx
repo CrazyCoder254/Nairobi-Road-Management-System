@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { terminusesAPI } from "@/lib/api";
+import { CreateTerminusForm } from "@/components/forms/CreateTerminusForm";
 import { 
   MapPin, 
   Plus, 
@@ -17,7 +21,9 @@ import {
   Settings,
   Eye,
   Edit,
-  MoreVertical
+  MoreVertical,
+  Loader2,
+  Trash2
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -25,74 +31,49 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export const Terminuses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [terminuses, setTerminuses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const terminuses = [
-    {
-      id: 1,
-      name: "Kencom Terminus",
-      location: "Kencom House, CBD",
-      capacity: 150,
-      currentVehicles: 120,
-      status: "operational",
-      routes: 12,
-      operators: 8,
-      dailyRevenue: 45000,
-      lastMaintenance: "2024-01-15",
-      facilities: ["Parking", "Washrooms", "Waiting Area", "Security"]
-    },
-    {
-      id: 2,
-      name: "Railway Terminus",
-      location: "Railway Station, CBD",
-      capacity: 200,
-      currentVehicles: 180,
-      status: "operational",
-      routes: 18,
-      operators: 12,
-      dailyRevenue: 67000,
-      lastMaintenance: "2024-01-20",
-      facilities: ["Parking", "Washrooms", "Waiting Area", "Food Court", "Security"]
-    },
-    {
-      id: 3,
-      name: "Globe Roundabout",
-      location: "Globe Cinema Roundabout",
-      capacity: 80,
-      currentVehicles: 15,
-      status: "maintenance",
-      routes: 6,
-      operators: 4,
-      dailyRevenue: 12000,
-      lastMaintenance: "2024-01-22",
-      facilities: ["Parking", "Basic Shelter"]
-    },
-    {
-      id: 4,
-      name: "Muthurwa Terminus",
-      location: "Muthurwa Market",
-      capacity: 120,
-      currentVehicles: 95,
-      status: "operational",
-      routes: 15,
-      operators: 10,
-      dailyRevenue: 38000,
-      lastMaintenance: "2024-01-18",
-      facilities: ["Parking", "Washrooms", "Market Access", "Security"]
-    },
-    {
-      id: 5,
-      name: "Tea Room Terminus",
-      location: "Tea Room Area, CBD",
-      capacity: 100,
-      currentVehicles: 0,
-      status: "construction",
-      routes: 0,
-      operators: 0,
-      dailyRevenue: 0,
-      lastMaintenance: "N/A",
-      facilities: ["Under Construction"]
+  const fetchTerminuses = async () => {
+    try {
+      setLoading(true);
+      const response = await terminusesAPI.getAll({ search: searchTerm, status: statusFilter === 'all' ? undefined : statusFilter });
+      setTerminuses(response.data || []);
+    } catch (error) {
+      toast.error("Failed to fetch terminuses");
+      console.error("Fetch terminuses error:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchTerminuses();
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchTerminuses();
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, statusFilter]);
+
+  const handleCreateSuccess = () => {
+    setIsDialogOpen(false);
+    fetchTerminuses();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this terminus?")) return;
+    try {
+      await terminusesAPI.delete(id);
+      toast.success("Terminus deleted successfully");
+      fetchTerminuses();
+    } catch (error) {
+      toast.error("Failed to delete terminus");
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -144,10 +125,23 @@ export const Terminuses = () => {
             Manage and monitor all transport terminuses in Nairobi
           </p>
         </div>
-        <Button variant="premium" className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Add New Terminus
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="premium" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add New Terminus
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Terminus</DialogTitle>
+            </DialogHeader>
+            <CreateTerminusForm 
+              onSuccess={handleCreateSuccess}
+              onCancel={() => setIsDialogOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -237,71 +231,79 @@ export const Terminuses = () => {
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {filteredTerminuses.map((terminus) => (
-                <TableRow key={terminus.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium text-foreground">{terminus.name}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {terminus.location}
+              <TableBody>
+                {filteredTerminuses.map((terminus: any) => (
+                  <TableRow key={terminus._id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium text-foreground">{terminus.name}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {terminus.location?.address || 'N/A'}
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(terminus.status)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className={`font-medium ${getCapacityColor(terminus.currentVehicles, terminus.capacity)}`}>
-                        {terminus.currentVehicles}/{terminus.capacity}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(terminus.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className={`font-medium ${getCapacityColor(terminus.currentOccupancy || 0, terminus.totalCapacity)}`}>
+                          {terminus.currentOccupancy || 0}/{terminus.totalCapacity}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          ({Math.round(((terminus.currentOccupancy || 0) / terminus.totalCapacity) * 100)}%)
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        ({Math.round((terminus.currentVehicles/terminus.capacity)*100)}%)
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Bus className="h-4 w-4 text-muted-foreground" />
+                        {terminus.routes?.length || 0}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Bus className="h-4 w-4 text-muted-foreground" />
-                      {terminus.routes}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">KSh {terminus.dailyRevenue.toLocaleString()}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">{terminus.lastMaintenance}</div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="flex items-center gap-2">
-                          <Eye className="h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center gap-2">
-                          <Edit className="h-4 w-4" />
-                          Edit Terminus
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center gap-2">
-                          <Settings className="h-4 w-4" />
-                          Configure
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center gap-2">
-                          <Wrench className="h-4 w-4" />
-                          Schedule Maintenance
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">KSh {(terminus.dailyRevenue || 0).toLocaleString()}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {terminus.lastInspection ? new Date(terminus.lastInspection).toLocaleDateString() : 'N/A'}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem className="flex items-center gap-2">
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="flex items-center gap-2">
+                            <Edit className="h-4 w-4" />
+                            Edit Terminus
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="flex items-center gap-2 text-destructive"
+                            onClick={() => handleDelete(terminus._id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Terminus
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredTerminuses.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-4">
+                      No terminuses found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
           </Table>
         </CardContent>
       </Card>
