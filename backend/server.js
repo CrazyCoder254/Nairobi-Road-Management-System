@@ -33,9 +33,10 @@ app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
   credentials: true
 }));
+
 
 // Compression
 app.use(compression());
@@ -74,6 +75,11 @@ app.use('/api/routes', routeRoutes);
 app.use('/api/terminuses', terminusRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/documents', documentRoutes);
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.originalUrl}`);
+  next();
+});
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {
