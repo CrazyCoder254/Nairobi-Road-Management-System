@@ -1,10 +1,12 @@
 const express = require('express');
 const { body } = require('express-validator');
 const vehicleController = require('../controllers/vehicleController');
-const auth = require('../middleware/auth');
-const { authorize } = require('../middleware/auth');
+const { auth, authorize } = require('../middleware/auth'); // ✅ Destructure both from the module
+
+
 
 const router = express.Router();
+
 
 // Validation rules
 const vehicleValidation = [
@@ -18,8 +20,6 @@ const vehicleValidation = [
 
 // Routes
 router.get('/', auth, vehicleController.getAllVehicles);
-router.get('/stats', auth, vehicleController.getVehicleStats);
-router.get('/:id', auth, vehicleController.getVehicleById);
 router.post('/', auth, authorize(['admin', 'operator']), vehicleValidation, vehicleController.createVehicle);
 router.put('/:id', auth, authorize(['admin', 'operator']), vehicleValidation, vehicleController.updateVehicle);
 router.delete('/:id', auth, authorize(['admin']), vehicleController.deleteVehicle);

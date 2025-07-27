@@ -1,8 +1,8 @@
 const express = require('express');
 const { body } = require('express-validator');
 const documentController = require('../controllers/documentController');
-const auth = require('../middleware/auth');
-const { authorize } = require('../middleware/auth');
+const { auth, authorize } = require('../middleware/auth'); // ✅ Destructure both from the module
+
 
 const router = express.Router();
 
