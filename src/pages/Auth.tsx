@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Shield, UserCheck, Lock, Mail, User, Phone, Building2 } from "lucide-react";
+import { authAPI } from "@/lib/api";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -61,20 +62,36 @@ export const Auth = ({ onAuth }: AuthProps) => {
 
   const onLogin = async (data: LoginForm) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log("Login data:", data);
-    setIsLoading(false);
-    onAuth();
+    try {
+      await authAPI.login(data.email, data.password);
+      onAuth();
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onSignup = async (data: SignupForm) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log("Signup data:", data);
-    setIsLoading(false);
-    onAuth();
+    try {
+      const [firstName, ...lastNameParts] = data.fullName.split(' ');
+      const lastName = lastNameParts.join(' ') || firstName;
+      
+      await authAPI.register({
+        firstName,
+        lastName,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        role: data.role,
+      });
+      onAuth();
+    } catch (error) {
+      console.error('Signup error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
