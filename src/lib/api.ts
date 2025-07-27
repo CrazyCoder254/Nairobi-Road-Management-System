@@ -9,7 +9,7 @@ export const removeToken = () => localStorage.removeItem('token');
 // API wrapper with auth
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   const token = getToken();
-  
+
   const config: RequestInit = {
     ...options,
     headers: {
@@ -20,7 +20,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   };
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-  
+
   if (!response.ok) {
     if (response.status === 401) {
       removeToken();
@@ -36,10 +36,20 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 // Auth API
 export const authAPI = {
   login: async (email: string, password: string) => {
-    return apiRequest('/auth/login', {
+    const response = await apiRequest('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
+    console.log('Logged in user:', response.user);
+
+
+    if (response.token) {
+      setToken(response.token);
+    } else {
+      console.warn("Login successful but token is missing in response.");
+    }
+
+    return response;
   },
 
   register: async (data: {
@@ -65,7 +75,7 @@ export const vehiclesAPI = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
     if (params?.status) queryParams.append('status', params.status);
-    
+
     return apiRequest(`/vehicles?${queryParams}`);
   },
 
@@ -106,7 +116,7 @@ export const driversAPI = {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
-    
+
     return apiRequest(`/drivers?${queryParams}`);
   },
 
@@ -154,7 +164,7 @@ export const saccosAPI = {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
-    
+
     return apiRequest(`/saccos?${queryParams}`);
   },
 
@@ -192,7 +202,7 @@ export const routesAPI = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
     if (params?.status) queryParams.append('status', params.status);
-    
+
     return apiRequest(`/routes?${queryParams}`);
   },
 
@@ -240,7 +250,7 @@ export const terminusesAPI = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
     if (params?.status) queryParams.append('status', params.status);
-    
+
     return apiRequest(`/terminuses?${queryParams}`);
   },
 
@@ -284,7 +294,7 @@ export const paymentsAPI = {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
-    
+
     return apiRequest(`/payments?${queryParams}`);
   },
 
@@ -333,7 +343,7 @@ export const documentsAPI = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
     if (params?.status) queryParams.append('status', params.status);
-    
+
     return apiRequest(`/documents?${queryParams}`);
   },
 
