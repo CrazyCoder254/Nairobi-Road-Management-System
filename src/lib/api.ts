@@ -244,11 +244,10 @@ export const terminusesAPI = {
   create: async (data: {
     name: string;
     location: { address: string; city: string; region: string };
-    capacity: number;
+    totalCapacity: number;
     facilities?: string[];
     operatingHours?: { start: string; end: string };
     contactPerson: { name: string; phone: string };
-    description?: string;
   }) => {
     return apiRequest('/terminuses', 'POST', data);
   },

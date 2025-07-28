@@ -27,10 +27,9 @@ export const CreateTerminusForm = ({ onSuccess, onCancel }: CreateTerminusFormPr
     address: "",
     city: "Nairobi",
     region: "Nairobi",
-    capacity: "",
+    totalCapacity: "",
     contactPersonName: "",
     contactPersonPhone: "",
-    description: "",
     facilities: [] as string[],
     operatingHours: {
       start: "05:00",
@@ -56,14 +55,13 @@ export const CreateTerminusForm = ({ onSuccess, onCancel }: CreateTerminusFormPr
           city: formData.city,
           region: formData.region
         },
-        capacity: parseInt(formData.capacity),
+        totalCapacity: parseInt(formData.totalCapacity),
         facilities: formData.facilities,
         operatingHours: formData.operatingHours,
         contactPerson: {
           name: formData.contactPersonName,
           phone: formData.contactPersonPhone
-        },
-        description: formData.description
+        }
       });
       toast.success("Terminus created successfully");
       onSuccess();
@@ -106,12 +104,12 @@ export const CreateTerminusForm = ({ onSuccess, onCancel }: CreateTerminusFormPr
           />
         </div>
         <div>
-          <Label htmlFor="capacity">Capacity</Label>
+          <Label htmlFor="totalCapacity">Capacity</Label>
           <Input
-            id="capacity"
+            id="totalCapacity"
             type="number"
-            value={formData.capacity}
-            onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+            value={formData.totalCapacity}
+            onChange={(e) => setFormData({ ...formData, totalCapacity: e.target.value })}
             required
           />
         </div>
@@ -167,29 +165,20 @@ export const CreateTerminusForm = ({ onSuccess, onCancel }: CreateTerminusFormPr
 
       <div>
         <Label>Facilities</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {facilityOptions.map((facility) => (
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          {facilityOptions.slice(0, 6).map((facility) => (
             <div key={facility.value} className="flex items-center space-x-2">
               <Checkbox
                 id={facility.value}
                 checked={formData.facilities.includes(facility.value)}
                 onCheckedChange={(checked) => handleFacilityChange(facility.value, checked as boolean)}
               />
-              <Label htmlFor={facility.value} className="text-sm">
+              <Label htmlFor={facility.value} className="text-xs">
                 {facility.label}
               </Label>
             </div>
           ))}
         </div>
-      </div>
-
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Input
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        />
       </div>
 
       <div className="flex gap-2 pt-4">
