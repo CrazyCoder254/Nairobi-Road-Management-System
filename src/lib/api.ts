@@ -1,3 +1,5 @@
+import axios, { AxiosResponse } from 'axios';
+
 // API Configuration and Services
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -6,42 +8,57 @@ export const getToken = () => localStorage.getItem('token');
 export const setToken = (token: string) => localStorage.setItem('token', token);
 export const removeToken = () => localStorage.removeItem('token');
 
-// API wrapper with auth
-const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const token = getToken();
+// Axios instance configuration
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-  };
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-
-  if (!response.ok) {
-    if (response.status === 401) {
+// Response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  (error) => {
+    if (error.response?.status === 401) {
       removeToken();
       window.location.href = '/';
     }
-    const error = await response.json().catch(() => ({ message: 'Network error' }));
-    throw new Error(error.message || 'API request failed');
+    throw new Error(error.response?.data?.message || error.message || 'API request failed');
   }
+);
 
-  return response.json();
+// API wrapper
+const apiRequest = async (endpoint: string, method: string = 'GET', data?: any) => {
+  try {
+    const response = await api.request({
+      url: endpoint,
+      method,
+      data,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message || 'API request failed');
+  }
 };
 
 // Auth API
 export const authAPI = {
   login: async (email: string, password: string) => {
-    const response = await apiRequest('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await apiRequest('/auth/login', 'POST', { email, password });
     console.log('Logged in user:', response.user);
-
 
     if (response.token) {
       setToken(response.token);
@@ -60,10 +77,7 @@ export const authAPI = {
     password: string;
     role: string;
   }) => {
-    return apiRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest('/auth/register', 'POST', data);
   },
 };
 
@@ -80,32 +94,28 @@ export const vehiclesAPI = {
   },
 
   create: async (data: {
-    registrationNumber: string;
+    plateNumber: string;
     make: string;
     model: string;
     year: number;
     capacity: number;
-    sacco: string;
+    saccoId: string;
     vehicleType?: string;
     status?: string;
+    color?: string;
+    fuelType?: string;
+    chassisNumber?: string;
+    engineNumber?: string;
   }) => {
-    return apiRequest('/vehicles', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest('/vehicles', 'POST', data);
   },
 
   update: async (id: string, data: any) => {
-    return apiRequest(`/vehicles/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return apiRequest(`/vehicles/${id}`, 'PUT', data);
   },
 
   delete: async (id: string) => {
-    return apiRequest(`/vehicles/${id}`, {
-      method: 'DELETE',
-    });
+    return apiRequest(`/vehicles/${id}`, 'DELETE');
   },
 };
 
@@ -130,30 +140,19 @@ export const driversAPI = {
     dateOfBirth: string;
     sacco: string;
   }) => {
-    return apiRequest('/drivers', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest('/drivers', 'POST', data);
   },
 
   update: async (id: string, data: any) => {
-    return apiRequest(`/drivers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return apiRequest(`/drivers/${id}`, 'PUT', data);
   },
 
   delete: async (id: string) => {
-    return apiRequest(`/drivers/${id}`, {
-      method: 'DELETE',
-    });
+    return apiRequest(`/drivers/${id}`, 'DELETE');
   },
 
   assignVehicle: async (id: string, vehicleId: string) => {
-    return apiRequest(`/drivers/${id}/assign-vehicle`, {
-      method: 'POST',
-      body: JSON.stringify({ vehicleId }),
-    });
+    return apiRequest(`/drivers/${id}/assign-vehicle`, 'POST', { vehicleId });
   },
 };
 
@@ -174,23 +173,15 @@ export const saccosAPI = {
     contactPerson: { name: string; phone: string; email: string };
     officeLocation: { address: string; city: string; region: string };
   }) => {
-    return apiRequest('/saccos', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest('/saccos', 'POST', data);
   },
 
   update: async (id: string, data: any) => {
-    return apiRequest(`/saccos/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return apiRequest(`/saccos/${id}`, 'PUT', data);
   },
 
   delete: async (id: string) => {
-    return apiRequest(`/saccos/${id}`, {
-      method: 'DELETE',
-    });
+    return apiRequest(`/saccos/${id}`, 'DELETE');
   },
 };
 
@@ -222,23 +213,15 @@ export const routesAPI = {
     operatingHours?: { start: string; end: string };
     description?: string;
   }) => {
-    return apiRequest('/routes', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest('/routes', 'POST', data);
   },
 
   update: async (id: string, data: any) => {
-    return apiRequest(`/routes/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return apiRequest(`/routes/${id}`, 'PUT', data);
   },
 
   delete: async (id: string) => {
-    return apiRequest(`/routes/${id}`, {
-      method: 'DELETE',
-    });
+    return apiRequest(`/routes/${id}`, 'DELETE');
   },
 };
 
@@ -267,23 +250,15 @@ export const terminusesAPI = {
     contactPerson: { name: string; phone: string };
     description?: string;
   }) => {
-    return apiRequest('/terminuses', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest('/terminuses', 'POST', data);
   },
 
   update: async (id: string, data: any) => {
-    return apiRequest(`/terminuses/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return apiRequest(`/terminuses/${id}`, 'PUT', data);
   },
 
   delete: async (id: string) => {
-    return apiRequest(`/terminuses/${id}`, {
-      method: 'DELETE',
-    });
+    return apiRequest(`/terminuses/${id}`, 'DELETE');
   },
 };
 
@@ -314,24 +289,15 @@ export const paymentsAPI = {
     entityType: string;
     entityId: string;
   }) => {
-    return apiRequest('/payments', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest('/payments', 'POST', data);
   },
 
   update: async (id: string, data: any) => {
-    return apiRequest(`/payments/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return apiRequest(`/payments/${id}`, 'PUT', data);
   },
 
   processPayment: async (id: string, data: { amount: number; paymentMethod: string; referenceNumber?: string }) => {
-    return apiRequest(`/payments/${id}/process`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest(`/payments/${id}/process`, 'POST', data);
   },
 };
 
@@ -348,33 +314,23 @@ export const documentsAPI = {
   },
 
   upload: async (formData: FormData) => {
-    const token = getToken();
-    const response = await fetch(`${API_BASE_URL}/documents/upload`, {
-      method: 'POST',
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-      throw new Error(error.message || 'Upload failed');
+    try {
+      const response = await api.post('/documents/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Upload failed');
     }
-
-    return response.json();
   },
 
   verify: async (id: string) => {
-    return apiRequest(`/documents/${id}/verify`, {
-      method: 'POST',
-    });
+    return apiRequest(`/documents/${id}/verify`, 'POST');
   },
 
   reject: async (id: string, reason: string) => {
-    return apiRequest(`/documents/${id}/reject`, {
-      method: 'POST',
-      body: JSON.stringify({ reason }),
-    });
+    return apiRequest(`/documents/${id}/reject`, 'POST', { reason });
   },
 };

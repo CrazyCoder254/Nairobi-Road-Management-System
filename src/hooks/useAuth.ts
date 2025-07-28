@@ -23,8 +23,8 @@ export const useAuth = () => {
   useEffect(() => {
     const token = getToken();
     if (token) {
-      // In a real app, you'd verify the token with the backend
       setIsAuthenticated(true);
+      // TODO: In production, verify token with backend and get user data
     }
     setIsLoading(false);
   }, []);

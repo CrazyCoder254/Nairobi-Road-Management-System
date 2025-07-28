@@ -12,14 +12,23 @@ import { Reports } from "@/pages/Reports";
 import { Settings } from "@/pages/Settings";
 import { Documents } from "@/pages/Documents";
 import { Auth } from "@/pages/Auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState("dashboard");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
-    return <Auth onAuth={() => setIsAuthenticated(true)} />;
+    return <Auth />;
   }
 
   const renderPage = () => {
