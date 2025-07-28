@@ -18,12 +18,14 @@ const driverValidation = [
   body('sacco').isMongoId().withMessage('Valid SACCO ID is required')
 ];
 
+
+
 // Routes
 router.get('/', auth, driverController.getAllDrivers);
 router.get('/:id', auth, driverController.getDriverById);
-router.post('/', auth, authorize(['admin', 'operator']), driverValidation, driverController.createDriver);
-router.put('/:id', auth, authorize(['admin', 'operator']), driverValidation, driverController.updateDriver);
-router.delete('/:id', auth, authorize(['admin']), driverController.deleteDriver);
-router.post('/:id/assign-vehicle', auth, authorize(['admin', 'operator']), driverController.assignVehicle);
+router.post('/', auth, driverValidation, driverController.createDriver);
+router.put('/:id', auth, driverValidation, driverController.updateDriver);
+router.delete('/:id', auth, driverController.deleteDriver);
+router.post('/:id/assign-vehicle', auth, driverController.assignVehicle);
 
 module.exports = router;

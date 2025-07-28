@@ -42,7 +42,7 @@ export const Payments = () => {
     try {
       setLoading(true);
       const response = await paymentsAPI.getAll({ search: searchTerm });
-      setPayments(response.data || []);
+      setPayments(response.payments || []);
     } catch (error) {
       toast.error("Failed to fetch payments");
       console.error("Fetch payments error:", error);

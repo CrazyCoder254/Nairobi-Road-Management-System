@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 
 const routeSchema = new mongoose.Schema({
-  routeNumber: { type: String, required: true, unique: true },
+  routeCode: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   
   // Route Details
-  startPoint: { type: String, required: true },
-  endPoint: { type: String, required: true },
+  startTerminus: { type: String, required: true },
+  endTerminus: { type: String, required: true },
   distance: { type: Number, required: true }, // in kilometers
-  estimatedTravelTime: { type: Number, required: true }, // in minutes
+  estimatedDuration: { type: Number, required: true }, // in minutes
   
   // Stops
   stops: [{
@@ -28,7 +28,7 @@ const routeSchema = new mongoose.Schema({
   frequency: { type: Number, default: 15 }, // minutes between vehicles
   
   // Financial
-  fare: { type: Number, required: true },
+  fareAmount: { type: Number, required: true },
   distanceFare: Number, // fare per km
   
   // Assignment

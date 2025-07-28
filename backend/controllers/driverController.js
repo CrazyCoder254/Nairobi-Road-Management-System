@@ -19,7 +19,7 @@ exports.getAllDrivers = async (req, res) => {
 
     const drivers = await Driver.find(query)
       .populate('assignedVehicle', 'registrationNumber make model')
-      .populate('sacco', 'name')
+      .populate("saccoId")
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 });
@@ -56,12 +56,17 @@ exports.getDriverById = async (req, res) => {
 
 // Create new driver
 exports.createDriver = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.error("Validation errors:", errors.array());
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const existing = await Driver.findOne({ licenseNumber: req.body.licenseNumber });
+    if (existing) {
+      return res.status(400).json({ message: "License number already registered" });
     }
 
+  try {
     const {
       firstName,
       lastName,
@@ -69,17 +74,10 @@ exports.createDriver = async (req, res) => {
       email,
       licenseNumber,
       licenseExpiryDate,
+      licenseClass,
       dateOfBirth,
-      address,
-      sacco,
-      emergencyContact
+      sacco
     } = req.body;
-
-    // Check if license number already exists
-    const existingDriver = await Driver.findOne({ licenseNumber });
-    if (existingDriver) {
-      return res.status(400).json({ message: 'License number already exists' });
-    }
 
     const driver = new Driver({
       firstName,
@@ -87,21 +85,21 @@ exports.createDriver = async (req, res) => {
       phone,
       email,
       licenseNumber,
-      licenseExpiryDate,
+      licenseClass,
+      licenseExpiry: licenseExpiryDate,
       dateOfBirth,
-      address,
-      sacco,
-      emergencyContact
+      saccoId: sacco
     });
 
     await driver.save();
-    await driver.populate('sacco', 'name');
-
     res.status(201).json(driver);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Error creating driver:", error.message);
+    res.status(500).json({ message: 'Failed to create driver', error: error.message });
   }
 };
+
+
 
 // Update driver
 exports.updateDriver = async (req, res) => {

@@ -37,7 +37,7 @@ export const Saccos = () => {
     try {
       setLoading(true);
       const response = await saccosAPI.getAll();
-      setSaccos(response.data || []);
+    setSaccos(response.saccos || []);
     } catch (error) {
       toast.error("Failed to fetch SACCOs");
       console.error("Fetch saccos error:", error);
@@ -63,8 +63,6 @@ export const Saccos = () => {
         },
         officeLocation: { 
           address: formData.address, 
-          city: "Nairobi", 
-          region: "Nairobi" 
         }
       });
       toast.success("SACCO created successfully");
@@ -261,20 +259,21 @@ export const Saccos = () => {
               <CardContent className="space-y-4">
                 {/* Chairman & Contact */}
                 <div className="space-y-2">
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Chairman: </span>
-                    <span className="font-medium">{sacco.chairperson || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{sacco.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-blue-600 hover:underline cursor-pointer">
-                      {sacco.email || 'N/A'}
-                    </span>
-                  </div>
+                 <div className="text-sm">
+                  <span className="text-muted-foreground">Chairman: </span>
+                  <span className="font-medium">{sacco.contactPerson?.name || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span>{sacco.contactPerson?.phone || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-blue-600 hover:underline cursor-pointer">
+                    {sacco.contactPerson?.email || 'N/A'}
+                  </span>
+                </div>
+
                 </div>
 
                 {/* Fleet Information */}

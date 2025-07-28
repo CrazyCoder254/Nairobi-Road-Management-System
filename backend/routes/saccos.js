@@ -8,18 +8,15 @@ const router = express.Router();
 
 // Validation rules
 const saccoValidation = [
-  body('name').notEmpty().withMessage('SACCO name is required'),
+  body('name').notEmpty().withMessage('Sacco name is required'),
   body('registrationNumber').notEmpty().withMessage('Registration number is required'),
-  body('chairman.name').notEmpty().withMessage('Chairman name is required'),
-  body('chairman.phone').isMobilePhone().withMessage('Valid chairman phone is required'),
-  body('secretary.name').notEmpty().withMessage('Secretary name is required'),
-  body('secretary.phone').isMobilePhone().withMessage('Valid secretary phone is required'),
-  body('treasurer.name').notEmpty().withMessage('Treasurer name is required'),
-  body('treasurer.phone').isMobilePhone().withMessage('Valid treasurer phone is required'),
-  body('phone').isMobilePhone().withMessage('Valid phone number is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('totalMembers').isInt({ min: 1 }).withMessage('Valid total members count is required')
+  body('contactPerson.name').notEmpty().withMessage('Chairperson name is required'),
+  body('contactPerson.phone').notEmpty().withMessage('Valid phone number is required'),
+  body('contactPerson.email').isEmail().withMessage('Valid email is required'),
+  body('officeLocation.address').notEmpty().withMessage('Address is required'),
 ];
+
+
 
 // Routes
 router.get('/', auth, saccoController.getAllSaccos);
@@ -28,6 +25,6 @@ router.get('/:id/vehicles', auth, saccoController.getSaccoVehicles);
 router.get('/:id/drivers', auth, saccoController.getSaccoDrivers);
 router.post('/', auth, saccoValidation, saccoController.createSacco);
 router.put('/:id', auth, authorize(['admin', 'operator']), saccoValidation, saccoController.updateSacco);
-router.delete('/:id', auth, authorize(['admin']), saccoController.deleteSacco);
+router.delete('/:id', auth, saccoController.deleteSacco);
 
 module.exports = router;

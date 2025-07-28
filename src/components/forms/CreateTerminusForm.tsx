@@ -25,15 +25,15 @@ export const CreateTerminusForm = ({ onSuccess, onCancel }: CreateTerminusFormPr
   const [formData, setFormData] = useState({
     name: "",
     address: "",
-    city: "Nairobi",
-    region: "Nairobi",
+    city: "",
+    region: "",
     totalCapacity: "",
     contactPersonName: "",
     contactPersonPhone: "",
     facilities: [] as string[],
     operatingHours: {
-      start: "05:00",
-      end: "23:00"
+      start: "",
+      end: ""
     }
   });
 

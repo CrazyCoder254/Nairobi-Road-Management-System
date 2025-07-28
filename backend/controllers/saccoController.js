@@ -66,36 +66,27 @@ exports.createSacco = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const {
+        const {
       name,
       registrationNumber,
-      chairman,
-      secretary,
-      treasurer,
-      address,
-      phone,
-      email,
-      operatingRoutes,
-      totalMembers
+      contactPerson,
+      officeLocation
     } = req.body;
+    
+    console.log("Received data:", req.body);
 
-    // Check if registration number already exists
-    const existingSacco = await Sacco.findOne({ registrationNumber });
-    if (existingSacco) {
+
+    // Check for duplicate registration number
+    const existing = await Sacco.findOne({ registrationNumber });
+    if (existing) {
       return res.status(400).json({ message: 'Registration number already exists' });
     }
 
-    const sacco = new Sacco({
+      const sacco = new Sacco({
       name,
       registrationNumber,
-      chairman,
-      secretary,
-      treasurer,
-      address,
-      phone,
-      email,
-      operatingRoutes,
-      totalMembers
+      contactPerson,
+      officeLocation
     });
 
     await sacco.save();
@@ -104,6 +95,7 @@ exports.createSacco = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 // Update sacco
 exports.updateSacco = async (req, res) => {

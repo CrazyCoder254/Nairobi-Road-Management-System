@@ -42,8 +42,8 @@ export const CreatePaymentForm = ({ onSuccess, onCancel }: CreatePaymentFormProp
           vehiclesAPI.getAll(),
           driversAPI.getAll()
         ]);
-        setVehicles(vehiclesRes.data || []);
-        setDrivers(driversRes.data || []);
+        setVehicles(vehiclesRes.vehicles || []);
+        setDrivers(driversRes.drivers || []);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }

@@ -21,8 +21,8 @@ const routeValidation = [
 router.get('/', auth, routeController.getAllRoutes);
 router.get('/stats', auth, routeController.getRouteStats);
 router.get('/:id', auth, routeController.getRouteById);
-router.post('/', auth, authorize(['admin', 'operator']), routeValidation, routeController.createRoute);
-router.put('/:id', auth, authorize(['admin', 'operator']), routeValidation, routeController.updateRoute);
-router.delete('/:id', auth, authorize(['admin']), routeController.deleteRoute);
+router.post('/', auth, routeValidation, routeController.createRoute);
+router.put('/:id', auth, routeValidation, routeController.updateRoute);
+router.delete('/:id', auth, routeController.deleteRoute);
 
 module.exports = router;

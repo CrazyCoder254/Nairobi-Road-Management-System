@@ -136,6 +136,7 @@ export const driversAPI = {
     phone: string;
     email: string;
     licenseNumber: string;
+    licenseClass:String;
     licenseExpiryDate: string;
     dateOfBirth: string;
     sacco: string;
@@ -170,8 +171,14 @@ export const saccosAPI = {
   create: async (data: {
     name: string;
     registrationNumber: string;
-    contactPerson: { name: string; phone: string; email: string };
-    officeLocation: { address: string; city: string; region: string };
+    contactPerson: {
+      name: string;
+      phone: string;
+      email: string;
+    };
+    officeLocation: {
+      address: string;
+    };
   }) => {
     return apiRequest('/saccos', 'POST', data);
   },
@@ -248,6 +255,7 @@ export const terminusesAPI = {
     facilities?: string[];
     operatingHours?: { start: string; end: string };
     contactPerson: { name: string; phone: string };
+
   }) => {
     return apiRequest('/terminuses', 'POST', data);
   },

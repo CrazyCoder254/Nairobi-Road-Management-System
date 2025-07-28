@@ -21,53 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Mock data for vehicles
-const mockVehicles = [
-  {
-    id: "1",
-    plateNumber: "KCA 123D",
-    type: "Matatu",
-    capacity: 14,
-    driver: "John Kariuki",
-    route: "Ngong - CBD",
-    status: 'active' as const,
-    sacco: "Ngong Road Sacco",
-    location: "Dagoretti Corner"
-  },
-  {
-    id: "2",
-    plateNumber: "KBZ 456E",
-    type: "Bus",
-    capacity: 33,
-    driver: "Mary Wanjiku",
-    route: "Kikuyu - CBD",
-    status: 'maintenance' as const,
-    sacco: "Kikuyu Express",
-    location: "Maintenance Bay 2"
-  },
-  {
-    id: "3",
-    plateNumber: "KAA 789F",
-    type: "Matatu",
-    capacity: 14,
-    driver: "Peter Mwangi",
-    route: "Thika - CBD",
-    status: 'active' as const,
-    sacco: "Thika Road Matatu",
-    location: "Stage 1, CBD"
-  },
-  {
-    id: "4",
-    plateNumber: "KBA 321G",
-    type: "Bus",
-    capacity: 51,
-    driver: "Grace Muthoni",
-    route: "Eastleigh - CBD",
-    status: 'inactive' as const,
-    sacco: "Eastlands Sacco",
-    location: "Eastleigh Terminus"
-  },
-];
 
 export const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState("");

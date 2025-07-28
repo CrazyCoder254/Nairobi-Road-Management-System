@@ -27,7 +27,7 @@ export const Routes = () => {
     try {
       setLoading(true);
       const response = await routesAPI.getAll();
-      setRoutes(response.data || []);
+      setRoutes(response.routes || []);
     } catch (error) {
       toast.error("Failed to fetch routes");
       console.error("Fetch routes error:", error);
@@ -39,7 +39,7 @@ export const Routes = () => {
   const fetchTerminuses = async () => {
     try {
       const response = await terminusesAPI.getAll();
-      setTerminuses(response.data || []);
+      setTerminuses(response.terminuses || []);
     } catch (error) {
       console.error("Fetch terminuses error:", error);
     }

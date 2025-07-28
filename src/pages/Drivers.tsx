@@ -46,16 +46,17 @@ export const Drivers = () => {
     phone: "",
     email: "",
     licenseNumber: "",
+    licenseClass: "",
     licenseExpiryDate: "",
     dateOfBirth: "",
-    sacco: ""
+    sacco: "",
   });
 
   const fetchDrivers = async () => {
     try {
       setLoading(true);
       const response = await driversAPI.getAll({ search: searchTerm });
-      setDrivers(response.data || []);
+      setDrivers(response.drivers || []);
     } catch (error) {
       toast.error("Failed to fetch drivers");
       console.error("Fetch drivers error:", error);
@@ -67,7 +68,7 @@ export const Drivers = () => {
   const fetchSaccos = async () => {
     try {
       const response = await saccosAPI.getAll();
-      setSaccos(response.data || []);
+      setSaccos(response.saccos || []);
     } catch (error) {
       console.error("Fetch saccos error:", error);
     }
@@ -97,16 +98,21 @@ export const Drivers = () => {
         phone: "",
         email: "",
         licenseNumber: "",
+        licenseClass: "",
         licenseExpiryDate: "",
         dateOfBirth: "",
         sacco: ""
       });
       fetchDrivers();
-    } catch (error) {
-      toast.error("Failed to create driver");
+   } catch (error: any) {
+      if (error.response?.data?.error?.includes("duplicate key")) {
+        toast.error("License number already exists");
+      } else {
+        toast.error("Failed to create driver");
+      }
       console.error("Create driver error:", error);
     }
-  };
+      };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this driver?")) return;
@@ -160,7 +166,7 @@ export const Drivers = () => {
   };
 
   const filteredDrivers = drivers.filter(driver => {
-    const driverName = `${driver.userId?.firstName || ''} ${driver.userId?.lastName || ''}`;
+  const driverName = `${driver.firstName} ${driver.lastName}`;
     const matchesSearch = driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          driver.licenseNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          driver.saccoId?.name?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -189,7 +195,7 @@ export const Drivers = () => {
               Register New Driver
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Register New Driver</DialogTitle>
             </DialogHeader>
@@ -242,6 +248,12 @@ export const Drivers = () => {
                   required
                 />
               </div>
+              <Label htmlFor="licenseClass">License Class</Label>
+              <Input
+                id="licenseClass"
+                value={formData.licenseClass}
+                onChange={(e) => setFormData({ ...formData, licenseClass: e.target.value })}
+              />
               <div>
                 <Label htmlFor="licenseExpiryDate">License Expiry Date</Label>
                 <Input
@@ -391,11 +403,11 @@ export const Drivers = () => {
                           </Avatar>
                           <div>
                             <div className="font-medium text-foreground">{driverName}</div>
-                            <div className="text-sm text-muted-foreground">{driver.licenseNumber}</div>
+                            <div className="text-sm text-muted-foreground">{driver.firstName}</div>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                               <span className="flex items-center gap-1">
                                 <Phone className="h-3 w-3" />
-                                {driver.userId?.phone}
+                                {driver.phone}
                               </span>
                             </div>
                           </div>

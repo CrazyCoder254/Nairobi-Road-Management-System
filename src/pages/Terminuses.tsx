@@ -39,7 +39,7 @@ export const Terminuses = () => {
     try {
       setLoading(true);
       const response = await terminusesAPI.getAll({ search: searchTerm, status: statusFilter === 'all' ? undefined : statusFilter });
-      setTerminuses(response.data || []);
+      setTerminuses(response.terminuses || []);
     } catch (error) {
       toast.error("Failed to fetch terminuses");
       console.error("Fetch terminuses error:", error);

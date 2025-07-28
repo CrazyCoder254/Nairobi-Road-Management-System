@@ -40,66 +40,25 @@ const seedDatabase = async () => {
     console.log('Created admin user');
 
     // Create sample SACCOs
-    const saccos = await Sacco.create([
-      {
-        name: 'Dar es Salaam Bus Operators Association',
-        registrationNumber: 'SACCO001',
-        chairman: {
-          name: 'John Mwalimu',
-          phone: '+255123456789',
-          email: 'chairman@dalatdala.com'
-        },
-        secretary: {
-          name: 'Mary Kimaro',
-          phone: '+255123456790',
-          email: 'secretary@dalatdala.com'
-        },
-        treasurer: {
-          name: 'Peter Mollel',
-          phone: '+255123456791',
-          email: 'treasurer@dalatdala.com'
-        },
-        address: {
-          street: 'Uhuru Street',
-          city: 'Dar es Salaam',
-          region: 'Dar es Salaam',
-          postalCode: '12345'
-        },
-        phone: '+255123456789',
-        email: 'info@dalatdala.com',
-        totalMembers: 150,
-        operatingRoutes: ['Kariakoo - Mwenge', 'Posta - Mbezi']
-      },
-      {
-        name: 'Mwanza Transport SACCO',
-        registrationNumber: 'SACCO002',
-        chairman: {
-          name: 'James Maganga',
-          phone: '+255123456792',
-          email: 'chairman@mwanzatransport.com'
-        },
-        secretary: {
-          name: 'Grace Mwita',
-          phone: '+255123456793',
-          email: 'secretary@mwanzatransport.com'
-        },
-        treasurer: {
-          name: 'David Nyerere',
-          phone: '+255123456794',
-          email: 'treasurer@mwanzatransport.com'
-        },
-        address: {
-          street: 'Kenyatta Road',
-          city: 'Mwanza',
-          region: 'Mwanza',
-          postalCode: '33000'
-        },
-        phone: '+255123456792',
-        email: 'info@mwanzatransport.com',
-        totalMembers: 85,
-        operatingRoutes: ['City Centre - Airport', 'Bus Stand - Kirumba']
-      }
-    ]);
+const saccos = await Sacco.create([
+  {
+    name: 'Dar es Salaam Bus Operators Association',
+    registrationNumber: 'SACCO001',
+    chairperson: 'John Mwalimu',
+    phone: '+255123456789',
+    email: 'info@dalatdala.com',
+    address: 'Uhuru Street, Dar es Salaam'
+  },
+  {
+    name: 'Mwanza Transport SACCO',
+    registrationNumber: 'SACCO002',
+    chairperson: 'James Maganga',
+    phone: '+255123456792',
+    email: 'info@mwanzatransport.com',
+    address: 'Kenyatta Road, Mwanza'
+  }
+]);
+
 
     console.log('Created sample SACCOs');
 

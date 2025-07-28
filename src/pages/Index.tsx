@@ -1,7 +1,8 @@
-import { MainLayout } from "@/components/layout/MainLayout";
+// import { MainLayout } from "@/components/layout/MainLayout";
+import { Auth } from "@/pages/Auth";
 
 const Index = () => {
-  return <MainLayout />;
+  return <Auth />;
 };
 
 export default Index;

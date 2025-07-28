@@ -29,8 +29,8 @@ router.get('/', auth, paymentController.getAllPayments);
 router.get('/stats', auth, paymentController.getPaymentStats);
 router.get('/overdue', auth, paymentController.getOverduePayments);
 router.get('/:id', auth, paymentController.getPaymentById);
-router.post('/', auth, authorize(['admin', 'operator']), paymentValidation, paymentController.createPayment);
-router.put('/:id', auth, authorize(['admin', 'operator']), paymentController.updatePayment);
-router.post('/:id/process', auth, authorize(['admin', 'operator']), paymentController.processPayment);
+router.post('/', auth, paymentValidation, paymentController.createPayment);
+router.put('/:id', auth, paymentController.updatePayment);
+router.post('/:id/process', auth, paymentController.processPayment);
 
 module.exports = router;

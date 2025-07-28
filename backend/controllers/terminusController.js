@@ -64,7 +64,8 @@ exports.createTerminus = async (req, res) => {
       facilities,
       operatingHours,
       contactPerson,
-      description
+      description,
+      totalCapacity
     } = req.body;
 
     const terminus = new Terminus({
@@ -74,7 +75,8 @@ exports.createTerminus = async (req, res) => {
       facilities,
       operatingHours,
       contactPerson,
-      description
+      description,
+      totalCapacity
     });
 
     await terminus.save();

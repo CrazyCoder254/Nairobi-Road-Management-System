@@ -12,7 +12,6 @@ const vehicleSchema = new mongoose.Schema({
   fuelType: { type: String, enum: ['Petrol', 'Diesel', 'Electric', 'Hybrid'], default: 'Diesel' },
   
   // Ownership & Management
-  saccoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Sacco', required: true },
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   currentDriver: { type: mongoose.Schema.Types.ObjectId, ref: 'Driver' },
   
@@ -42,6 +41,10 @@ const vehicleSchema = new mongoose.Schema({
     latitude: Number,
     longitude: Number,
     timestamp: Date
+  },
+    saccoId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Sacco', 
   },
   
   // Queue Management
