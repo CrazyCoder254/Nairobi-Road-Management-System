@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Shield, UserCheck, Lock, Mail, User, Phone, Building2 } from "lucide-react";
-import { authAPI } from "@/lib/api";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -32,12 +33,9 @@ const signupSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 type SignupForm = z.infer<typeof signupSchema>;
 
-interface AuthProps {
-  onAuth: () => void;
-}
-
-export const Auth = ({ onAuth }: AuthProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+export const Auth = () => {
+  const { login, register, isLoading } = useAuthContext();
+  const navigate = useNavigate();
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -61,24 +59,20 @@ export const Auth = ({ onAuth }: AuthProps) => {
   });
 
   const onLogin = async (data: LoginForm) => {
-    setIsLoading(true);
     try {
-      await authAPI.login(data.email, data.password);
-      onAuth();
+      await login(data.email, data.password);
+      navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const onSignup = async (data: SignupForm) => {
-    setIsLoading(true);
     try {
       const [firstName, ...lastNameParts] = data.fullName.split(' ');
       const lastName = lastNameParts.join(' ') || firstName;
       
-      await authAPI.register({
+      await register({
         firstName,
         lastName,
         email: data.email,
@@ -86,11 +80,9 @@ export const Auth = ({ onAuth }: AuthProps) => {
         password: data.password,
         role: data.role,
       });
-      onAuth();
+      navigate('/dashboard');
     } catch (error) {
       console.error('Signup error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

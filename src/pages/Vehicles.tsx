@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VehicleCard } from "@/components/vehicles/VehicleCard";
+import { CreateVehicleForm } from "@/components/forms/CreateVehicleForm";
 import { 
   Plus, 
   Search, 
@@ -73,6 +74,7 @@ export const Vehicles = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const { toast } = useToast();
 
   const { data: vehiclesData, isLoading, error, refetch } = useQuery({
@@ -114,7 +116,10 @@ export const Vehicles = () => {
             Manage and monitor all registered vehicles in the system
           </p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => setShowCreateForm(true)}
+        >
           <Plus className="h-4 w-4" />
           Register Vehicle
         </Button>
@@ -221,14 +226,18 @@ export const Vehicles = () => {
               key={vehicle._id || vehicle.id}
               vehicle={{
                 id: vehicle._id || vehicle.id,
-                plateNumber: vehicle.registrationNumber || vehicle.plateNumber,
+                plateNumber: vehicle.plateNumber || vehicle.registrationNumber,
                 type: vehicle.vehicleType || vehicle.type,
                 capacity: vehicle.capacity,
-                driver: vehicle.driver?.firstName + ' ' + vehicle.driver?.lastName || 'Unassigned',
-                route: vehicle.route?.name || 'No route assigned',
+                driver: vehicle.currentDriver ? 
+                  `${vehicle.currentDriver.firstName} ${vehicle.currentDriver.lastName}` : 
+                  'Unassigned',
+                route: vehicle.currentRoute?.name || 'No route assigned',
                 status: vehicle.status,
-                sacco: vehicle.sacco?.name || 'Unknown Sacco',
-                location: vehicle.currentLocation || 'Unknown'
+                sacco: vehicle.saccoId?.name || 'Unknown Sacco',
+                location: vehicle.lastLocation ? 
+                  `${vehicle.lastLocation.latitude}, ${vehicle.lastLocation.longitude}` : 
+                  'Unknown'
               }}
               onEdit={(vehicle) => console.log('Edit vehicle:', vehicle)}
               onViewDetails={(vehicle) => console.log('View details:', vehicle)}
@@ -269,6 +278,12 @@ export const Vehicles = () => {
           </Button>
         </div>
       )}
+
+      <CreateVehicleForm
+        open={showCreateForm}
+        onClose={() => setShowCreateForm(false)}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 };
