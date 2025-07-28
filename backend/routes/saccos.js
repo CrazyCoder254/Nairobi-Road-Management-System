@@ -26,7 +26,7 @@ router.get('/', auth, saccoController.getAllSaccos);
 router.get('/:id', auth, saccoController.getSaccoById);
 router.get('/:id/vehicles', auth, saccoController.getSaccoVehicles);
 router.get('/:id/drivers', auth, saccoController.getSaccoDrivers);
-router.post('/', auth, authorize(['admin', 'operator']), saccoValidation, saccoController.createSacco);
+router.post('/', auth, saccoValidation, saccoController.createSacco);
 router.put('/:id', auth, authorize(['admin', 'operator']), saccoValidation, saccoController.updateSacco);
 router.delete('/:id', auth, authorize(['admin']), saccoController.deleteSacco);
 
