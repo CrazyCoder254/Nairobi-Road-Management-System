@@ -26,10 +26,10 @@ const navigation = [
   { name: 'Terminuses', icon: MapPin, id: 'terminuses' },
   { name: 'Saccos', icon: Building2, id: 'saccos' },
   { name: 'Drivers', icon: Users, id: 'drivers' },
-  { name: 'Payments', icon: CreditCard, id: 'payments' },
-  { name: 'Reports', icon: BarChart3, id: 'reports' },
-  { name: 'Documents', icon: FileText, id: 'documents' },
-  { name: 'Settings', icon: Settings, id: 'settings' },
+  { name: 'Payments', icon: CreditCard, id: 'payments' }
+  // { name: 'Reports', icon: BarChart3, id: 'reports' },
+  // { name: 'Documents', icon: FileText, id: 'documents' },
+  // { name: 'Settings', icon: Settings, id: 'settings' },
 ];
 
 export const Sidebar = ({ isOpen, currentPage, onPageChange }: SidebarProps) => {
